@@ -23,10 +23,11 @@ Semantic Web course project · 2026
 4. [Requirements](#-requirements)
 5. [Installation](#-installation)
 6. [Verify the installation](#-verify-the-installation)
-7. [Project structure](#-project-structure)
-8. [Troubleshooting](#-troubleshooting)
-9. [Roadmap](#-roadmap)
-10. [References](#-references)
+7. [Exploratory analysis](#-exploratory-analysis)
+8. [Project structure](#-project-structure)
+9. [Troubleshooting](#-troubleshooting)
+10. [Roadmap](#-roadmap)
+11. [References](#-references)
 
 ---
 
@@ -162,7 +163,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-This installs Valentine together with its dependencies (NLTK, PuLP + CBC solver, POT, RapidFuzz…), plus pandas, scikit-learn, networkx and matplotlib.
+This installs Valentine together with its dependencies (NLTK, PuLP + CBC solver, POT, RapidFuzz…), plus pandas, scikit-learn, networkx, matplotlib and Jupyter.
 
 ## ✅ Verify the installation
 
@@ -181,6 +182,27 @@ Country <-> Region 0.5
 
 `Country ↔ Region` is found although the names differ, because the **values** are the same. That is exactly the signal we want to use for lineage.
 
+## 📊 Exploratory analysis
+
+The exploratory analysis (Milestone 2) is in [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb). It is committed with its outputs, so you can read it on GitHub without running anything.
+
+To run it yourself (virtual environment active, `lineage/` cloned):
+
+```cmd
+cd notebooks
+jupyter notebook 01_eda.ipynb
+```
+
+Or open the file in VS Code and pick the `.venv` interpreter as kernel. *Run All* takes about 30 seconds and rewrites the figures in [`docs/figures/`](docs/figures/).
+
+| Part | What it shows |
+|---|---|
+| 1. Basic analysis | objects per split, sizes, column types, missing values, data-quality issues, lineage graphs |
+| 2. Specific analysis | how much shared values (data matching) and similar column names (schema matching) separate true lineage links from other table pairs |
+| 3. Main outcomes | the key numbers in one table |
+
+The loading and cleaning code is in [`src/lineage_data.py`](src/lineage_data.py) and the measures in [`src/eda.py`](src/eda.py).
+
 ## 🗂️ Project structure
 
 ```
@@ -189,7 +211,12 @@ valentine-lineage/
 ├── requirements.txt     ← Python packages
 ├── .gitignore
 ├── docs/                ← notes, report drafts, slides
-├── src/                 ← project code (added step by step)
+│   └── figures/         ← figures produced by the notebooks
+├── notebooks/
+│   └── 01_eda.ipynb     ← exploratory data analysis (Milestone 2)
+├── src/
+│   ├── lineage_data.py  ← load and clean the benchmark CSVs
+│   └── eda.py           ← overlap and name-similarity measures
 ├── lineage/             ← data repo, cloned locally (git-ignored)
 └── .venv/               ← virtual environment (git-ignored)
 ```
@@ -212,7 +239,8 @@ Code, results and the report will be added step by step (see roadmap).
 - [x] Topic and reference paper chosen
 - [x] Environment set up (Python, Git, Valentine)
 - [x] Data source identified (`dudenzz/lineage` CSV exports)
-- [ ] Data loading and ground truth (table-level lineage)
+- [x] Data loading and ground truth (table-level lineage)
+- [x] Exploratory data analysis
 - [ ] Run all Valentine matchers on all table pairs
 - [ ] Turn column scores into table scores and evaluate (Precision, Recall, PR-AUC, Hits@k)
 - [ ] Error analysis: which kinds of lineage are found or missed
