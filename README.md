@@ -201,7 +201,7 @@ Or open the file in VS Code and pick the `.venv` interpreter as kernel. *Run All
 | 2. Specific analysis | how much shared values (data matching) and similar column names (schema matching) separate true lineage links from other table pairs |
 | 3. Main outcomes | the key numbers in one table |
 
-The loading and cleaning code is in [`src/lineage_data.py`](src/lineage_data.py) and the measures in [`src/eda.py`](src/eda.py).
+The loading and cleaning code is in [`src/lineage_data.py`](src/lineage_data.py) and the measures in [`src/eda.py`](src/eda.py). The two-page summary of the results is [`docs/eda_report.pdf`](docs/eda_report.pdf).
 
 ## 🗂️ Project structure
 
