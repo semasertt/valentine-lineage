@@ -24,10 +24,11 @@ Semantic Web course project · 2026
 5. [Installation](#-installation)
 6. [Verify the installation](#-verify-the-installation)
 7. [Exploratory analysis](#-exploratory-analysis)
-8. [Project structure](#-project-structure)
-9. [Troubleshooting](#-troubleshooting)
-10. [Roadmap](#-roadmap)
-11. [References](#-references)
+8. [Tools and pre-processing](#-tools-and-pre-processing)
+9. [Project structure](#-project-structure)
+10. [Troubleshooting](#-troubleshooting)
+11. [Roadmap](#-roadmap)
+12. [References](#-references)
 
 ---
 
@@ -203,6 +204,29 @@ Or open the file in VS Code and pick the `.venv` interpreter as kernel. *Run All
 
 The loading and cleaning code is in [`src/lineage_data.py`](src/lineage_data.py) and the measures in [`src/eda.py`](src/eda.py). The two-page summary of the results is [`docs/eda_report.pdf`](docs/eda_report.pdf).
 
+## 🧪 Tools and pre-processing
+
+Milestone 3. The tools we use and why:
+
+| Tool | Used for | Why this tool |
+|---|---|---|
+| **Valentine 1.1** | column matching: the method we evaluate | open-source library with both matcher families: schema-based (COMA, Cupid, Similarity Flooding) and instance-based (Jaccard, Distribution-based); the EDA showed that both signals are present in the data |
+| **pandas / NumPy** | loading, cleaning, candidate pairs | Valentine works on pandas DataFrames; the benchmark is a set of CSV files |
+| **NetworkX** | ground truth: lineage graph, bridging over temporary tables, pair labels | the lineage log is a directed graph |
+| **scikit-learn** | Precision, Recall, PR-AUC, AUROC | the metrics of the baseline paper; Hits@k and MRR are implemented on top |
+| **Matplotlib** | figures for the reports | |
+| **Jupyter, VS Code** | notebooks committed with their outputs | readable on GitHub without running anything |
+| **Git, GitHub, GitHub Projects** | code repository and Kanban board | |
+
+Two notebooks belong to this milestone:
+
+| Notebook | What it does |
+|---|---|
+| [`notebooks/02_tools_intro.ipynb`](notebooks/02_tools_intro.ipynb) | basic use of Valentine (matching two tables, one-to-one matches, the five matchers on a renamed column, column scores → table score), NetworkX (lineage graph, bridging) and scikit-learn (evaluating a ranking, Hits@k, MRR) |
+| [`notebooks/03_preprocessing.ipynb`](notebooks/03_preprocessing.ipynb) | the pre-processing: repairs broken rows, removes images and lineage bookkeeping IDs (`GlobalID`, which leaks the links), normalises values, builds the 30 evaluable links and the 842 labelled candidate table pairs, prepares the table-name variants |
+
+The pre-processing code is in [`src/preprocessing.py`](src/preprocessing.py). Running `03_preprocessing.ipynb` (about 45 seconds) writes the cleaned tables and `pairs.csv` to `data/processed/` (git-ignored); later notebooks read them with `preprocessing.load_processed()`.
+
 ## 🗂️ Project structure
 
 ```
@@ -213,10 +237,14 @@ valentine-lineage/
 ├── docs/                ← notes, report drafts, slides
 │   └── figures/         ← figures produced by the notebooks
 ├── notebooks/
-│   └── 01_eda.ipynb     ← exploratory data analysis (Milestone 2)
+│   ├── 01_eda.ipynb            ← exploratory data analysis (Milestone 2)
+│   ├── 02_tools_intro.ipynb    ← introduction to the tools (Milestone 3)
+│   └── 03_preprocessing.ipynb  ← pre-processing (Milestone 3)
 ├── src/
-│   ├── lineage_data.py  ← load and clean the benchmark CSVs
-│   └── eda.py           ← overlap and name-similarity measures
+│   ├── lineage_data.py  ← load the benchmark CSVs
+│   ├── eda.py           ← overlap and name-similarity measures, ground truth
+│   └── preprocessing.py ← cleaning, candidate pairs, table names
+├── data/processed/      ← output of 03_preprocessing (git-ignored)
 ├── lineage/             ← data repo, cloned locally (git-ignored)
 └── .venv/               ← virtual environment (git-ignored)
 ```
@@ -241,6 +269,8 @@ Code, results and the report will be added step by step (see roadmap).
 - [x] Data source identified (`dudenzz/lineage` CSV exports)
 - [x] Data loading and ground truth (table-level lineage)
 - [x] Exploratory data analysis
+- [x] Tool selection and introductory notebook
+- [x] Pre-processing and candidate pairs
 - [ ] Run all Valentine matchers on all table pairs
 - [ ] Turn column scores into table scores and evaluate (Precision, Recall, PR-AUC, Hits@k)
 - [ ] Error analysis: which kinds of lineage are found or missed
