@@ -9,7 +9,7 @@ Semantic Web course project · 2026
 ![Python](https://img.shields.io/badge/python-3.12%20|%203.13%20|%203.14-blue)
 ![Valentine](https://img.shields.io/badge/valentine-1.1-orange)
 ![Platform](https://img.shields.io/badge/platform-Windows%20|%20macOS%20|%20Linux-lightgrey)
-![Status](https://img.shields.io/badge/status-setup-yellow)
+![Status](https://img.shields.io/badge/status-first%20results-blue)
 
 </div>
 
@@ -25,10 +25,11 @@ Semantic Web course project · 2026
 6. [Verify the installation](#-verify-the-installation)
 7. [Exploratory analysis](#-exploratory-analysis)
 8. [Tools and pre-processing](#-tools-and-pre-processing)
-9. [Project structure](#-project-structure)
-10. [Troubleshooting](#-troubleshooting)
-11. [Roadmap](#-roadmap)
-12. [References](#-references)
+9. [Experiments and first results](#-experiments-and-first-results)
+10. [Project structure](#-project-structure)
+11. [Troubleshooting](#-troubleshooting)
+12. [Roadmap](#-roadmap)
+13. [References](#-references)
 
 ---
 
@@ -164,7 +165,13 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-This installs Valentine together with its dependencies (NLTK, PuLP + CBC solver, POT, RapidFuzz…), plus pandas, scikit-learn, networkx, matplotlib and Jupyter.
+This installs Valentine together with its dependencies (NLTK, PuLP + CBC solver, POT, RapidFuzz…), plus pandas, scikit-learn, networkx, matplotlib, Jupyter and HiGHS (`highspy`, a fallback solver for Valentine's Distribution-based matcher, see `src/matching.py`).
+
+Valentine downloads a few NLTK resources the first time it runs. If that fails (e.g. behind a proxy), download them once by hand:
+
+```cmd
+python -m nltk.downloader punkt_tab omw-1.4 stopwords wordnet
+```
 
 ## ✅ Verify the installation
 
@@ -227,6 +234,50 @@ Two notebooks belong to this milestone:
 
 The pre-processing code is in [`src/preprocessing.py`](src/preprocessing.py). Running `03_preprocessing.ipynb` (about 45 seconds) writes the cleaned tables and `pairs.csv` to `data/processed/` (git-ignored); later notebooks read them with `preprocessing.load_processed()`.
 
+## 🔬 Experiments and first results
+
+Milestone 4. [`notebooks/04_experiments.ipynb`](notebooks/04_experiments.ipynb) runs Valentine on all 842 candidate pairs and evaluates the result. It needs the output of `03_preprocessing.ipynb`.
+
+```cmd
+cd notebooks
+jupyter notebook 04_experiments.ipynb
+```
+
+The first run matches all pairs with all matchers (**about 4 minutes**, cached in `results/column_scores_raw.csv.gz`); later runs take about 50 seconds. The matching step can also be run from the command line:
+
+```cmd
+cd src
+python matching.py                 # all matchers, raw table names
+python matching.py --names neutral # table names on/off experiment (Milestone 5)
+```
+
+| Step | Code |
+|---|---|
+| 6 Valentine configurations (COMA schema / schema + instances, Cupid, Similarity Flooding, Jaccard, Distribution-based) × 842 ordered pairs | [`src/matching.py`](src/matching.py) |
+| column scores → table-pair score (`max`, `top3`, `mean`, `coverage` of the best score per target column) | [`src/evaluation.py`](src/evaluation.py) |
+| PR-AUC, AUROC, Hits@k, MRR; precision / recall at a threshold chosen on `train`; baselines; error analysis | [`src/evaluation.py`](src/evaluation.py) |
+
+**Protocol.** Valentine is not trained. The configuration and the threshold are chosen on `train`; `test` + `multi` (19 of the 30 links) are reported as held-out.
+
+**First results (held-out splits)**
+
+| Method | PR-AUC | AUROC | Hits@1 | Hits@3 | MRR |
+|---|---|---|---|---|---|
+| random ranking | 0.06 | 0.50 | 0.09 | 0.26 | 0.26 |
+| table-name similarity (no Valentine) | 0.12 | 0.64 | 0.40 | 0.53 | 0.52 |
+| value containment (no Valentine) | 0.22 | 0.86 | 0.33 | 0.73 | 0.54 |
+| Valentine COMA (schema) + mean | 0.18 | 0.78 | 0.20 | 0.47 | 0.45 |
+| Valentine COMA (schema + instances) + mean | 0.20 | 0.85 | 0.33 | 0.60 | 0.55 |
+| **Valentine Jaccard distance + mean** (chosen on train) | **0.21** | **0.86** | **0.40** | **0.73** | **0.59** |
+
+- **Values beat names**, as the EDA predicted; `mean` is the best aggregation for every matcher.
+- At the train threshold: precision 0.27, recall 0.32 for the exact link, but **every** false positive is a `reverse` or `indirect` pair, so all predicted pairs lie in a true lineage chain (same-chain precision 1.0). No unrelated pair or small-integer key match is predicted.
+- The direction is right for only 18 of 30 links; the missed links are bridged links, single-column join sources and transformed columns.
+- A hand-written value-overlap baseline is as good as Valentine's best matcher: Valentine's benefit here is an off-the-shelf, training-free, explainable signal, not a stronger one.
+- The GNN of the reference paper is evaluated at row level on a knowledge graph, so the numbers are not directly comparable; section 7 of the notebook gives the closest comparison (Hits@10 against 50 sampled negatives: 0.74).
+
+Figures: [`docs/figures/exp_*.png`](docs/figures/). Metric tables: `results/metrics_*.csv`.
+
 ## 🗂️ Project structure
 
 ```
@@ -239,17 +290,19 @@ valentine-lineage/
 ├── notebooks/
 │   ├── 01_eda.ipynb            ← exploratory data analysis (Milestone 2)
 │   ├── 02_tools_intro.ipynb    ← introduction to the tools (Milestone 3)
-│   └── 03_preprocessing.ipynb  ← pre-processing (Milestone 3)
+│   ├── 03_preprocessing.ipynb  ← pre-processing (Milestone 3)
+│   └── 04_experiments.ipynb    ← matching, evaluation, error analysis (Milestone 4)
 ├── src/
 │   ├── lineage_data.py  ← load the benchmark CSVs
 │   ├── eda.py           ← overlap and name-similarity measures, ground truth
-│   └── preprocessing.py ← cleaning, candidate pairs, table names
+│   ├── preprocessing.py ← cleaning, candidate pairs, table names
+│   ├── matching.py      ← runs the Valentine matchers on all pairs (cached)
+│   └── evaluation.py    ← table scores, metrics, baselines, error analysis
 ├── data/processed/      ← output of 03_preprocessing (git-ignored)
+├── results/             ← column scores and metric tables of 04_experiments (git-ignored)
 ├── lineage/             ← data repo, cloned locally (git-ignored)
 └── .venv/               ← virtual environment (git-ignored)
 ```
-
-Code, results and the report will be added step by step (see roadmap).
 
 ## 🛠️ Troubleshooting
 
@@ -261,6 +314,8 @@ Code, results and the report will be added step by step (see roadmap).
 | `No matching distribution found for …` | Usually a typo in the package name, or a Python version outside 3.12–3.14. |
 | `ModuleNotFoundError: valentine` | The virtual environment is not active. Run `.venv\Scripts\activate.bat`. |
 | `git` is not recognised | Install Git (`winget install -e --id Git.Git`) and reopen the terminal. |
+| `Failed to download required NLTK resource(s)` | Run `python -m nltk.downloader punkt_tab omw-1.4 stopwords wordnet` once. |
+| `PulpSolverError: ... cbc` (Distribution-based) | Import Valentine through `src/matching.py`, which patches the solver call; install `highspy` for the fallback solver. |
 
 ## 🗺️ Roadmap
 
@@ -271,9 +326,11 @@ Code, results and the report will be added step by step (see roadmap).
 - [x] Exploratory data analysis
 - [x] Tool selection and introductory notebook
 - [x] Pre-processing and candidate pairs
-- [ ] Run all Valentine matchers on all table pairs
-- [ ] Turn column scores into table scores and evaluate (Precision, Recall, PR-AUC, Hits@k)
-- [ ] Error analysis: which kinds of lineage are found or missed
+- [x] Run all Valentine matchers on all table pairs
+- [x] Turn column scores into table scores and evaluate (Precision, Recall, PR-AUC, Hits@k)
+- [x] Comparison with the GNN baseline paper (first iteration)
+- [ ] Error analysis: which kinds of lineage are found or missed (first pass done)
+- [ ] Combine aggregations and matchers
 - [ ] Extra experiments: table names on/off, lineage direction
 - [ ] Optional: add Valentine matches to the RDDL knowledge graph
 - [ ] Report and presentation
