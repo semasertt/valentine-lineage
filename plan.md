@@ -13,7 +13,7 @@ This file says where the project stands and who does what until the end. The Kan
 | 2 | Dataset, exploratory analysis | 09.11 | ✅ done (10/10) | `notebooks/01_eda.ipynb`, `docs/eda_report.pdf` |
 | 3 | Tools, pre-processing | 16.11 | ✅ done | `notebooks/02_tools_intro.ipynb`, `notebooks/03_preprocessing.ipynb` |
 | 4 | First iteration of experiments | 30.11 | ✅ done (9.5/10) | `notebooks/04_experiments.ipynb` |
-| 5 | Second iteration + **draft report** | **14.12** | 🟡 experiments done, report sections 1-5 done, results text + presentation open | `notebooks/05_second_iteration.ipynb`, `docs/report/` |
+| 5 | Second iteration + **draft report** | **14.12** | 🟡 experiments and draft report done, presentation open | `notebooks/05_second_iteration.ipynb`, `docs/report/` |
 | 6 | Final presentation | 11-18.01 | ⬜ | |
 | – | Final report + final code | 11-18.01 | ⬜ | |
 
@@ -45,40 +45,34 @@ Key findings:
    like the join tasks in the paper. Final system: Hits@3 = 1.0 for "fewer rows" and "same rows" links.
 6. Paper-style Hits@10 against 50 / 100 sampled negatives: 0.88 / 0.75 (first iteration 0.74 / 0.53).
 
-**Draft report** (`docs/report/report.tex` → `docs/report_draft.pdf`, LaTeX). Already written: abstract,
-1 Introduction, 2 Related work, 3 Data, 4 Method (with the pipeline figure), 5 Experimental setup, the result
-tables and figures of section 6, the bibliography (13 references, checked). The parts still to write are in
-**orange TODO boxes** in the PDF; each box names its owner and lists the points and numbers to use.
+**Draft report** (`docs/report/report.tex` → `docs/report_draft.pdf`, LaTeX, 9 pages): abstract,
+1 Introduction, 2 Related work, 3 Data, 4 Method (with the pipeline figure), 5 Experimental setup, 6 Results (first
+iteration, second iteration, comparison with the paper), 7 Discussion and limitations, 8 Conclusions, 13 checked
+references. For the final report (January) it needs a review by the whole team.
 
 **Kanban:** `docs/kanban_m5.png`.
 
 ## Milestone 5: what is left (due 14.12)
 
-Sema has done the first half: the second iteration of experiments, report sections 1-5 with all result tables
-and figures, this plan, the Kanban and the Milestone 5 fields of the course document (except the presentation).
-**The rest is for Yiğit, Alessandro and Achraf:**
+Everything except the presentation is done: the second iteration, the complete draft report
+(`docs/report_draft.pdf`, all sections 1-8 written), this plan, the Kanban and the Milestone 5 fields of the course
+document. **Only the presentation is left:**
 
-- [ ] **Yiğit**: report 6.1 (first-iteration results + error analysis) and section 8 (conclusions); check the abstract (due 07.12 / 10.12)
-- [ ] **Alessandro**: report 6.2 (second-iteration results); on 13.12 review the whole draft, remove the TODO boxes and rebuild `docs/report_draft.pdf` (due 07.12 / 13.12)
-- [ ] **Achraf**: report 6.3 (comparison with the paper) and section 7 (discussion and limitations) (due 07.12)
-- [ ] **Yiğit, Alessandro, Achraf**: Milestone 5 presentation, then add its link to the course document (due 14.12)
+- [ ] **All (Sema, Yiğit, Alessandro, Achraf)**: Milestone 5 presentation (second-iteration results) and its link
+      in the course document, due **14.12**. Material: Table 3-5 and Figures 1-3 of `docs/report_draft.pdf`,
+      `docs/figures/it2_*.png`, the summary table above.
 
-| Task | Owner | Due | Where | What exactly |
-|---|---|---|---|---|
-| Report 6.1: first-iteration results + error analysis | Yiğit | 07.12 | `report.tex`, TODO "Yiğit --- results of the first iteration" | 2-3 paragraphs from `04_experiments.ipynb` sections 3-6; optionally add `exp_04_top_pairs.png` or `exp_05_link_scores.png` |
-| Report 6.2: second-iteration results | Alessandro | 07.12 | `report.tex`, TODO "Alessandro" | one paragraph per experiment from `05_second_iteration.ipynb` sections 1-6 (numbers are in the TODO box) |
-| Report 6.3: comparison with the paper | Achraf | 07.12 | `report.tex`, TODO "Achraf --- comparison with the paper" | use the pros/cons table of `04_experiments.ipynb` section 7 |
-| Report 7: discussion and limitations | Achraf | 07.12 | `report.tex`, TODO "Achraf --- discussion and limitations" | the five points are listed in the box |
-| Report 8: conclusions, check the abstract | Yiğit | 10.12 | `report.tex`, TODO "Yiğit --- conclusions" | answer the research question + future work |
-| Review the whole draft, remove the TODO boxes, rebuild the PDF | Alessandro | 13.12 | `docs/report/` | see "Building the report" below |
-| Milestone 5 presentation + link in the course document | Yiğit, Alessandro, Achraf | 14.12 | Google Slides | second-iteration results; figures in `docs/figures/it2_*.png` and the tables of `report_draft.pdf` |
+Suggested slides: (1) recap of the problem and of the first iteration; (2) the four questions of the second
+iteration; (3) table names on/off; (4) combining aggregations and matchers (stacking); (5) direction of a link
+(Table 4) and its caveat; (6) results by scenario type (Figure 3); (7) final numbers vs. the first iteration
+(`it2_02_progress.png`) and vs. the paper (Table 5); (8) limitations and next steps.
 
 ## After Milestone 5
 
 | Task | Owner | Due |
 |---|---|---|
 | Optional: write the predicted links as `tableDerivedFrom` triples into the RDDL knowledge graph (rdflib) | Achraf | 21.12 |
-| Final report (from the draft; graded on references, figures, tables, sections, formatting) | All | 11.01 |
+| Final report: review and extend the draft (graded on references, figures, tables, sections, formatting) | All | 11.01 |
 | Final presentation | All | 11.01 |
 | Reproducibility check from a fresh clone, README cleanup | Sema | 11.01 |
 
