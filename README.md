@@ -26,10 +26,11 @@ Semantic Web course project · 2026
 7. [Exploratory analysis](#-exploratory-analysis)
 8. [Tools and pre-processing](#-tools-and-pre-processing)
 9. [Experiments and first results](#-experiments-and-first-results)
-10. [Project structure](#-project-structure)
-11. [Troubleshooting](#-troubleshooting)
-12. [Roadmap](#-roadmap)
-13. [References](#-references)
+10. [Second iteration and draft report](#-second-iteration-and-draft-report)
+11. [Project structure](#-project-structure)
+12. [Troubleshooting](#-troubleshooting)
+13. [Roadmap](#-roadmap)
+14. [References](#-references)
 
 ---
 
@@ -278,26 +279,61 @@ python matching.py --names neutral # table names on/off experiment (Milestone 5)
 
 Figures: [`docs/figures/exp_*.png`](docs/figures/). Metric tables: `results/metrics_*.csv`.
 
+## 🧩 Second iteration and draft report
+
+Milestone 5. [`notebooks/05_second_iteration.ipynb`](notebooks/05_second_iteration.ipynb) tests the four next steps of the first iteration. It needs the cached column scores of all three table-name variants:
+
+```cmd
+cd src
+python matching.py --names raw
+python matching.py --names neutral
+python matching.py --names base
+```
+
+| Question | Code | Answer (held-out) |
+|---|---|---|
+| Do table names make the task easier? | [`src/matching.py`](src/matching.py) | **no**: COMA, Cupid, Jaccard give identical scores with raw, base and neutral names |
+| Does mixing `mean` and `max` help join sources? | [`src/combination.py`](src/combination.py) | **no** gain |
+| Does combining matchers help? | [`src/combination.py`](src/combination.py) | stacking (logistic regression on all 24 scores, fitted on train): PR-AUC 0.21 → 0.25, Hits@3 0.73 → 0.93 |
+| Can a second signal give the direction? | [`src/combination.py`](src/combination.py) | object type order: 29/30 directions right (score alone 18/30); PR-AUC → **0.36**, MRR → **0.76**; relies on the benchmark's naming |
+| Which kinds of lineage are hard? | [`src/scenarios.py`](src/scenarios.py) | joins with single-column sources and bridged links |
+
+| System | PR-AUC | AUROC | Hits@1 | Hits@3 | MRR |
+|---|---|---|---|---|---|
+| first iteration (Jaccard distance + mean) | 0.21 | 0.86 | 0.40 | 0.73 | 0.59 |
+| stacking | 0.25 | 0.86 | 0.40 | 0.93 | 0.65 |
+| **stacking + type direction** | **0.36** | **0.92** | **0.60** | **0.93** | **0.76** |
+
+Figures: [`docs/figures/it2_*.png`](docs/figures/). Metrics: `results/metrics_second_iteration.csv`.
+
+The **draft technical report** is [`docs/report_draft.pdf`](docs/report_draft.pdf) (LaTeX source in [`docs/report/`](docs/report/)). Parts that are still to be written are marked with TODO boxes; who does what is in [`plan.md`](plan.md).
+
 ## 🗂️ Project structure
 
 ```
 valentine-lineage/
 ├── README.md            ← you are here
+├── plan.md              ← project plan, status and who does what
 ├── requirements.txt     ← Python packages
 ├── .gitignore
-├── docs/                ← notes, report drafts, slides
+├── docs/                ← reports, Kanban pictures
+│   ├── report/          ← LaTeX source of the technical report
+│   ├── report_draft.pdf ← draft technical report (Milestone 5)
 │   └── figures/         ← figures produced by the notebooks
 ├── notebooks/
 │   ├── 01_eda.ipynb            ← exploratory data analysis (Milestone 2)
 │   ├── 02_tools_intro.ipynb    ← introduction to the tools (Milestone 3)
 │   ├── 03_preprocessing.ipynb  ← pre-processing (Milestone 3)
-│   └── 04_experiments.ipynb    ← matching, evaluation, error analysis (Milestone 4)
+│   ├── 04_experiments.ipynb    ← matching, evaluation, error analysis (Milestone 4)
+│   └── 05_second_iteration.ipynb ← combination, names on/off, direction, scenario types (Milestone 5)
 ├── src/
 │   ├── lineage_data.py  ← load the benchmark CSVs
 │   ├── eda.py           ← overlap and name-similarity measures, ground truth
 │   ├── preprocessing.py ← cleaning, candidate pairs, table names
 │   ├── matching.py      ← runs the Valentine matchers on all pairs (cached)
-│   └── evaluation.py    ← table scores, metrics, baselines, error analysis
+│   ├── evaluation.py    ← table scores, metrics, baselines, error analysis
+│   ├── combination.py   ← hybrid aggregation, matcher combination, stacking, direction
+│   └── scenarios.py     ← scenario type of every lineage link
 ├── data/processed/      ← output of 03_preprocessing (git-ignored)
 ├── results/             ← column scores and metric tables of 04_experiments (git-ignored)
 ├── lineage/             ← data repo, cloned locally (git-ignored)
@@ -329,11 +365,12 @@ valentine-lineage/
 - [x] Run all Valentine matchers on all table pairs
 - [x] Turn column scores into table scores and evaluate (Precision, Recall, PR-AUC, Hits@k)
 - [x] Comparison with the GNN baseline paper (first iteration)
-- [ ] Error analysis: which kinds of lineage are found or missed (first pass done)
-- [ ] Combine aggregations and matchers
-- [ ] Extra experiments: table names on/off, lineage direction
+- [x] Error analysis: which kinds of lineage are found or missed (by relation and scenario type)
+- [x] Combine aggregations and matchers (second iteration)
+- [x] Extra experiments: table names on/off, lineage direction
+- [ ] Draft technical report (skeleton and sections 1-5 done, results text in progress, see `plan.md`)
 - [ ] Optional: add Valentine matches to the RDDL knowledge graph
-- [ ] Report and presentation
+- [ ] Final report and presentation
 
 ## 📖 References
 
